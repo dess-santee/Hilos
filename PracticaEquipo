@@ -64,7 +64,7 @@ void hilo1ConMutex() {
 
 
 // ======================================================
-// HILO 2
+// HILO 2 Hilo de Dessireé
 // ======================================================
 
 // SIN MUTEX
@@ -73,20 +73,7 @@ void hilo2SinMutex() {
     auto inicio = chrono::high_resolution_clock::now();
 
     for (long long i = 0; i < LIMITE; i++) {
-
-        /*
-        ============================================
-        AQUÍ EL HILO 2 COLOCA SU OPERACIÓN
-
-        Se debe modificar variableCompartida.
-
-        Ejemplo:
-
-        variableCompartida -= algunaOperacion;
-
-        ============================================
-        */
-
+        variableCompartida -= (i % 10);
     }
 
     auto fin = chrono::high_resolution_clock::now();
@@ -107,13 +94,7 @@ void hilo2ConMutex() {
     for (long long i = 0; i < LIMITE; i++) {
 
         mtx.lock();
-
-        /*
-        ============================================
-        AQUÍ SE COLOCA LA MISMA OPERACIÓN DEL HILO 2
-        ============================================
-        */
-
+        variableCompartida -= (i % 10);
         mtx.unlock();
     }
 
