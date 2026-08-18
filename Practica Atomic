@@ -27,17 +27,15 @@ atomic<long long> contadorHilo3(0);
 // Variable global compartida por los 3 hilos
 atomic<long long> contadorGlobal(0);
 
+// Vector global de datos
 vector<int> datos(NUM_DATOS);
 
 
 // =====================================================
-// HILO 1 - AITANA
+// HILO 1 - Aitana
 // =====================================================
-// PROCESO:
-// Realizar operaciones aritméticas con los 10 millones
-// de datos.
-//
-// En este caso se realiza una multiplicación.
+// PROCESO: Realizar operaciones aritméticas con los 10M
+// de datos (Multiplicación).
 // =====================================================
 
 void hilo1()
@@ -48,7 +46,6 @@ void hilo1()
 
     for (int i = 0; i < NUM_DATOS; i++)
     {
-
         int resultado = datos[i] * 2;
         contadorLocal++;
         contadorGlobal.fetch_add(1);
@@ -57,248 +54,137 @@ void hilo1()
     contadorHilo1.store(contadorLocal);
 
     auto fin = high_resolution_clock::now();
-
     duration<double> tiempo = fin - inicio;
 
-    cout << "Hilo 1 - Operaciones realizadas: "
+    cout << "[Hilo 1 - Aitana] Operaciones realizadas: "
          << contadorHilo1.load() << endl;
 
-    cout << "Tiempo Hilo 1: "
+    cout << "[Hilo 1 - Aitana] Tiempo: "
          << tiempo.count()
-         << " segundos" << endl;
+         << " segundos\n" << endl;
 }
 
 
 // =====================================================
-// HILO 2 - PERSONA 2
+// HILO 2 - Dessiree Niño Santel
 // =====================================================
-// PROCESO:
-// Buscar la cantidad de números múltiplos de X.
-//
+// PROCESO: Buscar la cantidad de números múltiplos de X.
 // =====================================================
 
 void hilo2()
 {
-    // =================================================
-    // COMPAÑERO 2:
-    // Escribir aquí su algoritmo.
-    //
-    // Debe:
-    //
-    // 1. Tomar el tiempo de inicio.
-    //
-    // 2. Recorrer los 10 millones de datos.
-    //
-    // 3. Encontrar los múltiplos de X.
-    //
-    // 4. Incrementar contadorHilo2.
-    //
-    // 5. Modificar contadorGlobal usando atomic.
-    //
-    // 6. Tomar el tiempo final.
-    //
-    // 7. Mostrar el contador de su hilo.
-    //
-    // =================================================
+    auto inicio = high_resolution_clock::now();
 
+    long long contadorLocal = 0;
 
+    for (int i = 0; i < NUM_DATOS; i++)
+    {
+        if (X != 0 && datos[i] % X == 0)
+        {
+            contadorLocal++;
+        }
+
+        contadorGlobal.fetch_add(1);
+    }
+
+    contadorHilo2.store(contadorLocal);
+
+    auto fin = high_resolution_clock::now();
+    duration<double> tiempo = fin - inicio;
+
+    cout << "[Hilo 2 - Dessiree] Cantidad de multiplos de " << X << " encontrados: "
+         << contadorHilo2.load() << endl;
+
+    cout << "[Hilo 2 - Dessiree] Tiempo: "
+         << tiempo.count()
+         << " segundos\n" << endl;
 }
 
 
 // =====================================================
-// HILO 3 - PERSONA 3
+// HILO 3 - Carlos Romero Samano
 // =====================================================
-// PROCESO:
-// Buscar la cantidad de números mayores que X.
-//
+// PROCESO: Cantidad de números mayores a X encontrados.
 // =====================================================
 
-void hilo3()
+void hilo3() 
 {
-    // =================================================
-    // COMPAÑERO 3:
-    // Escribir aquí su algoritmo.
-    //
-    // Debe:
-    //
-    // 1. Tomar el tiempo de inicio.
-    //
-    // 2. Recorrer los 10 millones de datos.
-    //
-    // 3. Encontrar los números mayores que X.
-    //
-    // 4. Incrementar contadorHilo3.
-    //
-    // 5. Modificar contadorGlobal usando atomic.
-    //
-    // 6. Tomar el tiempo final.
-    //
-    // 7. Mostrar el contador de su hilo.
-    //
-    // =================================================
+    auto inicio = high_resolution_clock::now();
 
+    long long contadorLocal = 0;
 
+    for (int i = 0; i < NUM_DATOS; ++i) 
+    {
+        if (datos[i] > X) 
+        {
+            contadorLocal++;
+        }
+        contadorGlobal.fetch_add(1);
+    }
+
+    contadorHilo3.store(contadorLocal);
+
+    auto fin = high_resolution_clock::now();
+    duration<double> tiempo = fin - inicio;
+
+    cout << "[Hilo 3 - Carlos] Numeros mayores a " << X << ": " 
+         << contadorHilo3.load() << endl;
+
+    cout << "[Hilo 3 - Carlos] Tiempo: "
+         << tiempo.count()
+         << " segundos\n" << endl;
 }
 
 
 // =====================================================
-// FUNCIÓN PRINCIPAL
+// FUNCIÓN PRINCIPAL (MAIN)
 // =====================================================
 
 int main()
 {
-    cout << "==========================================" << endl;
-    cout << "       PROGRAMA CON 3 HILOS Y ATOMIC" << endl;
-    cout << "==========================================" << endl;
+    cout << "=====================================================" << endl;
+    cout << " Generando " << NUM_DATOS << " datos aleatorios..." << endl;
+    cout << "=====================================================\n" << endl;
 
-    cout << "Generando "
-         << NUM_DATOS
-         << " datos..." << endl;
+    // Generar números aleatorios entre 1 y 100
+    mt19937 gen(42); 
+    uniform_int_distribution<int> dist(1, 100);
 
-
-    // =================================================
-    // GENERAR LOS 10 MILLONES DE DATOS
-    // =================================================
-
-    mt19937 generador(12345);
-
-    uniform_int_distribution<int> distribucion(1, 100);
-
-    for (int i = 0; i < NUM_DATOS; i++)
+    for (int i = 0; i < NUM_DATOS; ++i)
     {
-        datos[i] = distribucion(generador);
+        datos[i] = dist(gen);
     }
 
-    cout << "Datos generados correctamente." << endl;
+    cout << "Iniciando ejecución concurrente de los hilos...\n" << endl;
+    auto inicioGlobal = high_resolution_clock::now();
 
-    cout << "X = " << X << endl;
-
-    cout << endl;
-
-
-    // =================================================
-    // INICIO DEL TIEMPO TOTAL
-    // =================================================
-
-    auto inicioTotal = high_resolution_clock::now();
-
-
-    // =================================================
-    // CREACIÓN DE LOS 3 HILOS
-    // =================================================
-
+    // Crear y lanzar los hilos
     thread t1(hilo1);
-
     thread t2(hilo2);
-
     thread t3(hilo3);
 
-
-    // =================================================
-    // ESPERAR A QUE TERMINEN LOS 3 HILOS
-    // =================================================
-
+    // Esperar a que terminen los 3 hilos
     t1.join();
-
     t2.join();
-
     t3.join();
 
+    auto finGlobal = high_resolution_clock::now();
+    duration<double> tiempoTotal = finGlobal - inicioGlobal;
 
-    // =================================================
-    // FIN DEL TIEMPO TOTAL
-    // =================================================
+    // Despliegue de resultados globales
+    long long sumaDeContadores = contadorHilo1.load() + contadorHilo2.load() + contadorHilo3.load();
 
-    auto finTotal = high_resolution_clock::now();
-
-    duration<double> tiempoTotal = finTotal - inicioTotal;
-
-
-    // =================================================
-    // RESULTADOS FINALES
-    // =================================================
-
-    cout << endl;
-
-    cout << "==========================================" << endl;
-    cout << "             RESULTADOS FINALES" << endl;
-    cout << "==========================================" << endl;
-
-
-    cout << "Contador Hilo 1: "
-         << contadorHilo1.load()
-         << endl;
-
-
-    cout << "Contador Hilo 2: "
-         << contadorHilo2.load()
-         << endl;
-
-
-    cout << "Contador Hilo 3: "
-         << contadorHilo3.load()
-         << endl;
-
-
-    cout << endl;
-
-
-    // =================================================
-    // SUMA DE LOS 3 CONTADORES
-    // =================================================
-
-    long long sumaContadores =
-        contadorHilo1.load()
-        +
-        contadorHilo2.load()
-        +
-        contadorHilo3.load();
-
-
-    cout << "Suma de los contadores: "
-         << sumaContadores
-         << endl;
-
-
-    cout << "Contador Global: "
-         << contadorGlobal.load()
-         << endl;
-
-
-    // =================================================
-    // COMPROBAR QUE LA VARIABLE GLOBAL ES CORRECTA
-    // =================================================
-
-    if (contadorGlobal.load() == sumaContadores)
-    {
-        cout << endl;
-        cout << "CORRECTO: El contador global coincide "
-             << "con la suma de los 3 hilos."
-             << endl;
-    }
-    else
-    {
-        cout << endl;
-        cout << "ERROR: El contador global NO coincide "
-             << "con la suma de los 3 hilos."
-             << endl;
-    }
-
-
-    // =================================================
-    // TIEMPO TOTAL
-    // =================================================
-
-    cout << endl;
-
-    cout << "Tiempo total de ejecucion: "
-         << tiempoTotal.count()
-         << " segundos"
-         << endl;
-
-
-    cout << "==========================================" << endl;
-
+    cout << "=====================================================" << endl;
+    cout << "                 RESUMEN DE RESULTADOS               " << endl;
+    cout << "=====================================================" << endl;
+    cout << "Contador Hilo 1 (Aitana)   : " << contadorHilo1.load() << endl;
+    cout << "Contador Hilo 2 (Dessireé) : " << contadorHilo2.load() << endl;
+    cout << "Contador Hilo 3 (Carlos)   : " << contadorHilo3.load() << endl;
+    cout << "-----------------------------------------------------" << endl;
+    cout << "Contador Global (fetch_add): " << contadorGlobal.load() << endl;
+    cout << "Suma de Hilo1+Hilo2+Hilo3  : " << sumaDeContadores << endl;
+    cout << "Tiempo Total de Ejecución  : " << tiempoTotal.count() << " segundos" << endl;
+    cout << "=====================================================" << endl;
 
     return 0;
 }
